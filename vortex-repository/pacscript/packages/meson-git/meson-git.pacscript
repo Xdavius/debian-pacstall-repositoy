@@ -1,13 +1,12 @@
-pkgnpkgname="meson-git"
+pkgname="meson-git"
 gives="meson-git"
 provides="meson"
 replace="meson"
 pkgver=1.5
-pkgdesc="SCons-like build system that use python as a front-end language and Ninja as a building backend"
+pkgdesc="SCons-like build system that use python as a front-end language and Ninja as a building backend with debian-meson forked from arch-meson"
 arch=(any)
 url="http://mesonbuild.com/"
-license=('Apache')
-depends=('python' 'ninja')
+depends=("python3" "ninja-build")
 makedepends=(
   "git"
   "python3-build"
@@ -45,5 +44,3 @@ package() {
   install -Dm644 ../cross-lib32 "${pkgdir}/usr/share/meson/cross/lib32"
   install -Dm644 ../native-clang "${pkgdir}/usr/share/meson/native/clang"
 }
-
-
