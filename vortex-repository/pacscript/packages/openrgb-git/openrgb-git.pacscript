@@ -4,8 +4,8 @@ pkgver="0.9"
 pkgdesc="Configuration utility for RGB lights supporting motherboards, RAM, & peripherals"
 arch=("amd64")
 url='https://gitlab.com/CalcProgrammer1/OpenRGB'
-depends=("qttools5-dev-tools" "libusb-1.0-0-dev" "libhidapi-dev" "libmbedtls-dev")
-makedepends=("git" "qttools5-dev" "qtbase5-dev")
+depends=("qtbase5-dev" "libusb-1.0-0-dev" "libhidapi-dev" "libmbedtls-dev")
+makedepends=("git" "qttools5-dev" "qtbase5-dev" "libusb-1.0-0-dev" "libhidapi-dev" "libmbedtls-dev")
 optdepends=('i2c-tools: Motherboard & RAM access')
 provides=("openrgb")
 conflicts=("openrgb")
@@ -15,11 +15,12 @@ source=("git+https://gitlab.com/CalcProgrammer1/OpenRGB.git"
 sha256sums=("SKIP"
             "b5a53d747422f8b594e3e9615e238457d696732efce94050cdd72182a8645ef2"
             "272dc43a77d0e48d29f32da753c7e05fd635883b173c21047f4eefa8bfc77938")
+maintainer=("xdavius <xdavius@github.com>")
 
 build() {
   cd "${srcdir}/OpenRGB"
   qmake OpenRGB.pro
-  make -j$(NCPU)
+  make -j"$(NCPU)"
 }
 
 package() {
