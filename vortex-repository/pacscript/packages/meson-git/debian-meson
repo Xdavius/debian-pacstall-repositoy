@@ -1,10 +1,10 @@
 #!/bin/bash -ex
-# Highly opinionated wrapper for Arch Linux packaging
+# Highly opinionated wrapper for Debian/Ubuntu Linux packaging
 
 exec meson setup \
   --prefix        /usr \
-  --libexecdir    lib \
-  --sbindir       bin \
+  --libexecdir    lib/x86_64-linux-gnu \
+  --sbindir       sbin \
   --buildtype     plain \
   --auto-features enabled \
   --wrap-mode     nodownload \
