@@ -1,11 +1,10 @@
 pkgname="meson-git"
 gives="meson-git"
-provides="meson"
-replace="meson"
-pkgver=1.5
+provides="meson=1.5"
+pkgver="1.5"
 pkgdesc="SCons-like build system that use python as a front-end language and Ninja as a building backend with debian-meson forked from arch-meson"
 arch=(any)
-url="http://mesonbuild.com/"
+url='http://mesonbuild.com/'
 depends=("python3" "ninja-build")
 makedepends=(
   "git"
@@ -27,14 +26,10 @@ sha256sums=("SKIP"
   "47e6b7d18f2fbde2edd5674c812b9d4a279feb6d7f947310736c39cde28f8831"
   "a1fa7d0c3113776337a7e875a35d7cf625000d98024ad4537af23f719c50bfa4")
 
-pkgver() {
-	cd "${srcdir}/${pkgname%-git}"
-	printf "%s" "$(git describe --long | sed 's/\([^-]*-\)g/r\1/;s/-/./g')"
-}
 
 package() {
 	cd "${srcdir}/${pkgname%-git}"
-	python setup.py install --root="${pkgdir}" --optimize=1
+	python3 setup.py install --root="${pkgdir}" --optimize=1
 	install -D -m644 COPYING ${pkgdir}/usr/share/licenses/${pkgname}/COPYING
   for _f in data/syntax-highlighting/vim/*/*; do
     install -Dt "${pkgdir}/usr/share/vim/vimfiles/$(basename "$(dirname "$_f")")" -m644 "$_f"
