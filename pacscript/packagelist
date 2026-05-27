@@ -11,7 +11,9 @@ mesa
 mesa-lib32
 meson
 modprobed-db
+noise-suppression-for-voice-git
 qt6pas
+rnnoise
 rust-bin
 ulwgl-git
 xone-dkms-git

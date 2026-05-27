@@ -1,19 +1,31 @@
-# Debian Vortex Project
-New Linux project based on Debian and Pacstall
+## INSTALL
 
-For the moment, only the pacstall repository is available.
+Install Pacstall :
 
-Clic [`HERE`](https://github.com/Xdavius/vortex-linux/tree/main/vortex-repository) for install instructions
+      sudo apt install curl && sudo bash -c "$(curl -fsSL https://pacstall.dev/q/install)"
+
+Install repository :
+
+      pacstall -A https://raw.githubusercontent.com/Xdavius/vortex-linux/main/vortex-repository/pacscript
+
+Dev repository (USED FOR TESTING AND DEV - BECAREFULL) :
+
+      pacstall -A https://raw.githubusercontent.com/Xdavius/vortex-linux/dev/vortex-repository/pacscript
+
+Wiki for package maintainers/creator : https://github.com/pacstall/pacstall/wiki/Pacscript-101
 
 
-## Nvidia Quick setup Guide
+Change Branch :
+
+Edit the file and change "main" to "dev"
+
+      sudo nano /usr/share/pacstall/repo/pacstallrepo
 
 
-```
-sudo apt autopurge *'nvidia'* libnvidia*
-sudo dpkg --add-architecture i386
-sudo apt update
-sudo apt install curl && sudo bash -c "$(curl -fsSL https://pacstall.dev/q/install)"
-pacstall -A https://raw.githubusercontent.com/Xdavius/vortex-linux/main/vortex-repository/pacscript
-pacstall -I nvidia-driver-production-dkms-bundle
-```
+## THANKS
+
+PACSTALL WEBSITE : https://pacstall.dev
+
+PACSTALL GITHUB  : https://github.com/pacstall
+
+ARCHLINUX GITLAB : https://gitlab.archlinux.org/archlinux

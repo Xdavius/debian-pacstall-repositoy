@@ -1,0 +1,14 @@
+pkgname = rnnoise
+gives = rnnoise
+pkgver = 0.2
+pkgrel = 1
+pkgdesc = Recurrent neural network for audio noise suppression
+url = https://github.com/xiph/rnnoise
+arch = amd64
+source = https://github.com/xiph/rnnoise/archive/refs/tags/v0.2.tar.gz
+makedepends = autoconf
+makedepends = automake
+makedepends = libtool
+makedepends = pkg-config
+license = BSD-3-Clause
+sha256sums = SKIP
