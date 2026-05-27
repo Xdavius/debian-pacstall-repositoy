@@ -1,0 +1,93 @@
+--- a/src/util/cache_ops_x86.c
++++ b/src/util/cache_ops_x86.c
+@@ -38,6 +38,23 @@
+ void util_clflushopt_range(void *start, size_t size);
+ #endif
+ 
++/*
++ * GCC i386 can miss prototypes for some __builtin_ia32_* calls depending on
++ * target flags/header exposure. Use inline asm wrappers so 32-bit and 64-bit
++ * builds share the same behavior without feature regressions.
++ */
++static inline void
++mesa_clflush(void *p)
++{
++   __asm__ __volatile__("clflush (%0)" : : "r"(p) : "memory");
++}
++
++static inline void
++mesa_mfence(void)
++{
++   __asm__ __volatile__("mfence" : : : "memory");
++}
++
+ static void
+ util_clflush_range(void *start, size_t size)
+ {
+@@ -45,7 +62,7 @@
+    char *end = ((char *) start) + size;
+ 
+    while (p < end) {
+-      __builtin_ia32_clflush(p);
++      mesa_clflush(p);
+       p += CACHELINE_SIZE;
+    }
+ }
+@@ -65,12 +82,12 @@
+ void
+ util_flush_range(void *start, size_t size)
+ {
+-   __builtin_ia32_mfence();
++   mesa_mfence();
+ #ifdef HAVE___BUILTIN_IA32_CLFLUSHOPT
+    if (util_get_cpu_caps()->has_clflushopt) {
+       util_clflushopt_range(start, size);
+       /* clflushopt doesn't include an mfence like clflush */
+-      __builtin_ia32_mfence();
++      mesa_mfence();
+       return;
+    }
+ #endif
+@@ -98,36 +115,36 @@
+    if (util_get_cpu_caps()->has_clflushopt) {
+       util_clflushopt_range(start, size);
+       /* clflushopt doesn't include an mfence like clflush */
+-      __builtin_ia32_mfence();
++      mesa_mfence();
+       util_clflushopt_range((char *)start + size - 1, 1);
+       return;
+    }
+ #endif
+    util_clflush_range(start, size);
+-   __builtin_ia32_clflush((char *)start + size - 1);
++   mesa_clflush((char *)start + size - 1);
+ }
+ 
+ void
+ util_flush_inval_range(void *start, size_t size)
+ {
+    util_flush_inval_range_no_fence(start, size);
+-   __builtin_ia32_mfence();
++   mesa_mfence();
+ }
+ 
+ void
+ util_pre_flush_fence(void)
+ {
+-   __builtin_ia32_mfence();
++   mesa_mfence();
+ }
+ 
+ void
+ util_post_flush_fence(void)
+ {
+-   __builtin_ia32_mfence();
++   mesa_mfence();
+ }
+ 
+ void
+ util_post_flush_inval_fence(void)
+ {
+-   __builtin_ia32_mfence();
++   mesa_mfence();
+ }

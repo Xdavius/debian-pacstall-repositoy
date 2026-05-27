@@ -1,180 +1,296 @@
-pkgname="mesa"
-#gives="mesa"
-pkgver="24.0.2"
-pkgrel=1
-source=("https://mesa.freedesktop.org/archive/mesa-${pkgver}.tar.xz")
-#url="https://launchpad.net/~kisak/+archive/ubuntu/kisak-mesa/+sourcefiles/mesa/24.0.3~kisak1~j/mesa_24.0.3~kisak1~j.tar.xz"
+# shellcheck shell=bash
 
-makedepends=("cmake" "pkg-config" "glslang-tools" "libwayland-egl-backend-dev" "flex" "llvm-15" "libxcb-glx0-dev" "libxcb-dri2-0-dev" "libxcb-dri3-dev" "libxcb-present-dev" "libxshmfence-dev" "libxfixes-dev" "libomxil-bellagio-dev" "libva-dev" "libvdpau-dev" "wayland-protocols" "libx11-xcb-dev" "libxxf86vm-dev" "directx-headers-dev" "libllvmspirvlib-15-dev" "spirv-tools" "libclang-dev" "clang" "libglvnd-dev" "valgrind" "libunwind-dev" "libsensors-dev" "python3-ply" "bindgen")
+# Package metadata
+pkgbase="mesa"
+pkgver="26.1.1"
+pkgrel="1"
+pkgdesc="Mesa 3D graphics stack built from source for Debian 13 (amd64 only)"
+maintainer="xdavius <xdavius@github.com>"
+arch=("amd64")
+custom_fields=("Multi-Arch: same")
+url="https://www.mesa3d.org/"
+license=("MIT")
+external_connection=true
+source=(
+  "https://archive.mesa3d.org/mesa-${pkgver}.tar.xz"
+)
+sha256sums=(
+  "8bd36c031cc6d0edfec04617527609454ee3a09ad53bdf983b45fc2c1e129b2e"
+  "SKIP"
+)
 
-pacdeps=("libdrm" "meson")
+pkgname=(
+  "libegl-mesa0"
+  "libgl1-mesa-dri"
+  "libglapi-mesa"
+  "libglx-mesa0"
+  "libgbm1"
+  "mesa-libgallium"
+  "libosmesa6"
+  "mesa-va-drivers"
+  "mesa-vdpau-drivers"
+  "mesa-vulkan-drivers"
+)
 
-
-#libegl-dev libgl-dev libglx-dev mesa-vulkan-driver libgl1 bindgen
-
-
-
-provides=('libegl-mesa0' 'libgl1-mesa-dri' 'libglapi-mesa' 'libglu1-mesa' 'libglx-mesa0' 'libosmesa8' 'mesa-vulkan-drivers' 'mesa-vdpau-drivers' 'mesa-va-drivers' 'libxatracker2')
-
-replaces=('libegl-mesa0' 'libgl1-mesa-dri' 'libglapi-mesa' 'libglu1-mesa' 'libglx-mesa0' 'libosmesa8' 'mesa-vulkan-drivers' 'mesa-vdpau-drivers' 'mesa-va-drivers' 'libxatracker2')
-
-
-pkgdesc="free implementation of the OpenGL API -- GLX vendor library"
-repology=("project: mesa")
-arch=('amd64')
-maintainer=("Cavern")
+# Build dependencies (Debian 13)
+makedepends=(
+  "build-essential"
+  "meson"
+  "ninja-build"
+  "pkg-config"
+  "cmake"
+  "python3-mako"
+  "bison"
+  "flex"
+  "libdrm-dev"
+  "libexpat1-dev"
+  "libelf-dev"
+  "libzstd-dev"
+  "zlib1g-dev"
+  "libx11-dev"
+  "libxext-dev"
+  "libxdamage-dev"
+  "libxfixes-dev"
+  "libx11-xcb-dev"
+  "libxcb-glx0-dev"
+  "libxcb-dri2-0-dev"
+  "libxcb-dri3-dev"
+  "libxcb-present-dev"
+  "libxcb-randr0-dev"
+  "libxcb-shm0-dev"
+  "libxcb-sync-dev"
+  "libxcb-xfixes0-dev"
+  "libxxf86vm-dev"
+  "libxrandr-dev"
+  "libxshmfence-dev"
+  "libwayland-dev"
+  "libwayland-egl-backend-dev"
+  "wayland-protocols"
+  "libva-dev"
+  "libvulkan-dev"
+  "libglvnd-dev"
+  "glslang-tools"
+  "spirv-tools"
+  "bindgen"
+  "cbindgen"
+  "libclc-19"
+  "libclc-19-dev"
+  "libllvmspirvlib-19-dev"
+  "llvm-spirv-19"
+  "libclang-dev"
+  "llvm-19-dev"
+)
 
 prepare() {
-  cd "${_archive}"
-
-echo "no patches"
-
+  cd "${srcdir}/mesa-${pkgver}" || exit 1
 }
 
 build() {
-  cd "${_archive}"
+  cd "${srcdir}/mesa-${pkgver}" || exit 1
 
-local meson_options=(
-    -D android-libbacktrace=disabled
-    -D b_ndebug=true
-    -D dri3=enabled
-    -D egl=enabled
-    -D gbm=enabled
-    -D gles1=disabled
-    -D gles2=enabled
-    -D glvnd=true
-    -D glx=dri
-    -D intel-clc=disabled
-    -D libunwind=enabled
-    -D llvm=enabled
-    -D lmsensors=enabled
-    -D microsoft-clc=disabled
-    -D osmesa=true
-    -D platforms=x11,wayland
-    -D rust_std=2021
-    -D shared-glapi=enabled
-    -D valgrind=enabled
-    -D video-codecs=all
-    -D vulkan-drivers=amd,intel,intel_hasvk,swrast,virtio
-    -D vulkan-layers=device-select,intel-nullhw,overlay
+  meson setup build64 \
+    --prefix=/usr \
+    --libdir=lib/x86_64-linux-gnu \
+    --buildtype=release \
+    -Dplatforms=x11,wayland \
+    -Dgallium-drivers=auto \
+    -Dvulkan-drivers=auto \
+    -Dllvm=enabled \
+    -Dshared-llvm=enabled \
+    -Dglx=dri \
+    -Dgbm=enabled \
+    -Degl=enabled || exit 1
+
+  meson compile -C build64 || exit 1
+}
+
+_prepare_staging() {
+  cd "${srcdir}/mesa-${pkgver}" || exit 1
+  if [ ! -d "${srcdir}/_stage64/usr" ]; then
+    mkdir -p "${srcdir}/_stage64"
+    DESTDIR="${srcdir}/_stage64" meson install -C build64 || exit 1
+  fi
+}
+
+_copy_glob_from_stage64() {
+  local pattern="$1"
+  if compgen -G "${srcdir}/_stage64/${pattern}" >/dev/null; then
+    (
+      cd "${srcdir}/_stage64" || exit 1
+      cp -r --parents --no-preserve=ownership ${pattern} "${pkgdir}/"
+    ) || exit 1
+  fi
+}
+
+package_libegl-mesa0() {
+  _prepare_staging
+  pkgdesc="Mesa EGL vendor library"
+  depends=(
+    "libc6"
+    "libdrm2"
+    "libexpat1"
+    "libgcc-s1"
+    "libwayland-client0"
+    "libwayland-server0"
+    "libx11-xcb1"
+    "libxcb-dri3-0"
+    "libxcb-present0"
+    "libxcb-randr0"
+    "libxcb-shm0"
+    "libxcb-xfixes0"
+    "libxcb1"
+    "libgbm1"
+    "mesa-libgallium"
   )
-
-
-  # Build only minimal debug info to reduce size
-  CFLAGS+=' -g1'
-  CXXFLAGS+=' -g1'
-
-    arch-meson ./ build "${meson_options[@]}"
-    meson configure build # Print config
-    meson compile -C build
-
-    # fake installation to be seperated into packages
-    # outside of fakeroot but mesa doesn't need to chown/mod
-    DESTDIR="${srcdir}/fakeinstall" meson install -C build
-    ls ${srcdir}
-    sleep 5
-
+  _copy_glob_from_stage64 "usr/lib/*/libEGL_mesa.so*"
 }
 
-_install() {
-  local src f dir
-  for src; do
-    f="${src#fakeinstall/}"
-    dir="${pkgdir}/${f%/*}"
-    sudo install -m755 -d "${dir}"
-    sudo mv -v "${src}" "${dir}/"
-  done
+package_libglapi-mesa() {
+  _prepare_staging
+  pkgdesc="Mesa OpenGL API shared library"
+  depends=(
+    "libc6"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libglapi.so*"
 }
 
-_libdir=usr/lib/x86_64-linux-gnu
+package_libglx-mesa0() {
+  _prepare_staging
+  pkgdesc="Mesa GLX vendor library"
+  depends=(
+    "libc6"
+    "libdrm2"
+    "libexpat1"
+    "libx11-6"
+    "libx11-xcb1"
+    "libxcb-dri3-0"
+    "libxcb-glx0"
+    "libxcb-present0"
+    "libxcb-shm0"
+    "libxcb-xfixes0"
+    "libxcb1"
+    "libxext6"
+    "libxxf86vm1"
+    "mesa-libgallium"
+    "libgl1-mesa-dri"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libGLX_mesa.so*"
+}
 
-package() {
-  cd "${_archive}"
+package_libgbm1() {
+  _prepare_staging
+  pkgdesc="Mesa GBM runtime library"
+  depends=(
+    "libc6"
+    "libdrm2"
+    "libexpat1"
+    "libwayland-server0"
+    "mesa-libgallium"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libgbm.so*"
+}
 
-  set -e
-  _libdir=usr/lib/x86_64-linux-gnu
+package_mesa-libgallium() {
+  _prepare_staging
+  pkgdesc="Mesa Gallium runtime library"
+  depends=(
+    "libc6"
+    "libdrm-amdgpu1"
+    "libdrm-intel1"
+    "libdrm2"
+    "libelf1t64"
+    "libexpat1"
+    "libgcc-s1"
+    "libllvm19"
+    "libsensors5"
+    "libstdc++6"
+    "libx11-xcb1"
+    "libxcb-dri3-0"
+    "libxcb-present0"
+    "libxcb-randr0"
+    "libxcb-sync1"
+    "libxcb-xfixes0"
+    "libxcb1"
+    "libxshmfence1"
+    "libzstd1"
+    "zlib1g"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libgallium*.so*"
+}
 
-# vulkan-mesa-layers
+package_libosmesa6() {
+  _prepare_staging
+  pkgdesc="Mesa off-screen rendering library"
+  depends=(
+    "libc6"
+    "libdrm2"
+    "libgcc-s1"
+    "libllvm19"
+    "libstdc++6"
+    "libzstd1"
+    "zlib1g"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libOSMesa.so*"
+}
 
-  _install fakeinstall/usr/share/vulkan/explicit_layer.d
-  _install fakeinstall/usr/share/vulkan/implicit_layer.d
-  _install fakeinstall/$_libdir/libVkLayer_*.so
-  _install fakeinstall/usr/bin/mesa-overlay-control.py
+package_mesa-vdpau-drivers() {
+  _prepare_staging
+  pkgdesc="Mesa VDPAU drivers"
+  depends=(
+    "libvdpau1"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/vdpau/*.so*"
+}
 
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
+package_mesa-va-drivers() {
+  _prepare_staging
+  pkgdesc="Mesa VA-API drivers"
+  depends=(
+    "mesa-libgallium"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/dri/*_drv_video.so*"
+}
 
-# vulkan-intel
+package_mesa-vulkan-drivers() {
+  _prepare_staging
+  pkgdesc="Mesa Vulkan drivers and ICD manifests"
+  depends=(
+    "libvulkan1"
+    "libc6"
+    "libdrm-amdgpu1"
+    "libdrm2"
+    "libelf1t64"
+    "libexpat1"
+    "libgcc-s1"
+    "libllvm19"
+    "libstdc++6"
+    "libwayland-client0"
+    "libx11-xcb1"
+    "libxcb-dri3-0"
+    "libxcb-present0"
+    "libxcb-randr0"
+    "libxcb-shm0"
+    "libxcb-sync1"
+    "libxcb-xfixes0"
+    "libxcb1"
+    "libxshmfence1"
+    "libzstd1"
+    "zlib1g"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/libvulkan_*.so*"
+  _copy_glob_from_stage64 "usr/share/vulkan/*/*.json"
+}
 
-  _install fakeinstall/usr/share/vulkan/icd.d/intel_*.json
-  _install fakeinstall/$_libdir/libvulkan_intel*.so
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-
-# vulkan-radeon
-
-
-  _install fakeinstall/usr/share/drirc.d/00-radv-defaults.conf
-  _install fakeinstall/usr/share/vulkan/icd.d/radeon_icd*.json
-  _install fakeinstall/$_libdir/libvulkan_radeon.so
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-
-# vulkan-swrast
-
-  _install fakeinstall/usr/share/vulkan/icd.d/lvp_icd*.json
-  _install fakeinstall/$_libdir/libvulkan_lvp.so
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-# vulkan-virtio
-
-  _install fakeinstall/usr/share/vulkan/icd.d/virtio_icd*.json
-  _install fakeinstall/$_libdir/libvulkan_virtio.so
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-# libva-mesa-drivers
-
-  _install fakeinstall/$_libdir/dri/*_drv_video.so
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-# mesa-vdpau
-
-  _install fakeinstall/$_libdir/vdpau
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
-# mesa
-
-  _install fakeinstall/usr/share/drirc.d/00-mesa-defaults.conf
-  _install fakeinstall/usr/share/glvnd/egl_vendor.d/50_mesa.json
-
-  # ati-dri, nouveau-dri, intel-dri, svga-dri, swrast, swr
-  _install fakeinstall/$_libdir/dri/*_dri.so
-
-  _install fakeinstall/$_libdir/bellagio
-  _install fakeinstall/$_libdir/d3d
-  #_install fakeinstall/$_libdir/lib{gbm,glapi}.so*
-  _install fakeinstall/$_libdir/libglapi.so*
-  _install fakeinstall/$_libdir/libOSMesa.so*
-  _install fakeinstall/$_libdir/libxatracker.so*
-
-  _install fakeinstall/usr/include
-  _install fakeinstall/$_libdir/pkgconfig
-
-  # libglvnd support
-  _install fakeinstall/$_libdir/libGLX_mesa.so*
-  _install fakeinstall/$_libdir/libEGL_mesa.so*
-
-  # indirect rendering
-  ln -sr "$pkgdir"/$_libdir/libGLX_{mesa,indirect}.so.0
-
-  # make sure there are no files left to install
-  #find fakeinstall -depth -print0 | xargs -0 rmdir
-
-  #install -m644 -Dt "${pkgdir}/usr/share/licenses/${gives}" LICENSE
-
+package_libgl1-mesa-dri() {
+  _prepare_staging
+  pkgdesc="Mesa DRI OpenGL drivers"
+  depends=(
+    "libc6"
+    "libgbm1"
+    "libvulkan1"
+  )
+  _copy_glob_from_stage64 "usr/lib/*/dri/*.so*"
+  # VA-API drivers belong to mesa-va-drivers, not libgl1-mesa-dri.
+  # Remove both regular files and symlinks to avoid dpkg overwrite conflicts.
+  find "${pkgdir}/usr/lib" -name '*_drv_video.so*' -delete 2>/dev/null || true
 }
